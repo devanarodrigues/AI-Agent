@@ -12,18 +12,19 @@ from langchain_community.tools import DuckDuckGoSearchResults
 
 import streamlit as st
 
-def fetchStockPrice(ticket):
+def fetch_stock_price(ticket):
     stock = yf.download(ticket, start="2023-08-08", end="2024-08-08")
     return stock
 
-yfTool = Tool(
-    name="Yahoo finance Tool",
+yahoo_finance_tool = Tool(
+    name = "Yahoo Finance Tool",
     description = "Fetches stocks prices for {ticket} from the last year about a specific company from Yahoo Finance API",
-    func= lambda ticket: fetchStockPrice(ticket)
+    func= lambda ticket: fetch_stock_price(ticket)
 )
 
-os.environ['OPENAI_API_KEY']=st.secrets['OPENAI_API_KEY']
+os.environ['OPENAI_API_KEY']=st.secrets['OPEN_API_KEY']
 llm = ChatOpenAI(model="gpt-3.5-turbo")
+
 
 stockPriceAnalyst = Agent(
     role= "Senior stock price Analyst",
@@ -34,9 +35,10 @@ stockPriceAnalyst = Agent(
     llm= llm,
     max_iter= 5,
     memory= True,
-    tools=[yfTool],
+    tools=[yahoo_finance_tool],
     allow_delegation=False
 )
+
 
 getStockPrice = Task(
     description= "Analyze the stock {ticket} price history and create a trend analyses of up, down or sideways",
@@ -129,7 +131,7 @@ crew = Crew(
 )
 
 with st.sidebar:
-    st.header('Escreva o stock para peesquisar')
+    st.header('Escreva o stock para pesquisar')
 
     with st.form(key='research_form'):
         topic = st.text_input("Selecione o ticket")
